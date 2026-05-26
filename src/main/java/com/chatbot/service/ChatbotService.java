@@ -51,13 +51,25 @@ private String generarCierre() {
 
 private String aplicarPersonalidad(String mensaje) {
 
+    boolean mensajeNegativo =
+            mensaje.toLowerCase().contains("no contamos") ||
+            mensaje.toLowerCase().contains("no disponible") ||
+            mensaje.toLowerCase().contains("agotado");
+
     switch (personalidad) {
 
         case GAMER:
 
+            if (mensajeNegativo) {
+
+                return """
+                🎮 %s
+                """.formatted(mensaje);
+            }
+
             return """
             🎮 %s
-            
+
             🔥 Aprovecha antes que se agote.
             """.formatted(mensaje);
 
@@ -65,7 +77,7 @@ private String aplicarPersonalidad(String mensaje) {
 
             return """
             ✨ %s
-            
+
             Será un gusto ayudarte con cualquier consulta adicional.
             """.formatted(mensaje);
 
@@ -73,7 +85,7 @@ private String aplicarPersonalidad(String mensaje) {
 
             return """
             🛒 %s
-            
+
             📩 Escríbenos para coordinar compra o entrega.
             """.formatted(mensaje);
 
@@ -81,7 +93,7 @@ private String aplicarPersonalidad(String mensaje) {
 
             return """
             🛠️ %s
-            
+
             Si necesitas especificaciones técnicas,
             puedo ayudarte.
             """.formatted(mensaje);
@@ -90,7 +102,7 @@ private String aplicarPersonalidad(String mensaje) {
 
             return """
             👑 %s
-            
+
             Producto altamente recomendado para una experiencia premium.
             """.formatted(mensaje);
 
