@@ -258,44 +258,97 @@ public class ProductoDAO {
 
             int score = 0;
 
-            String contenido = normalizar(
-                    p.getNombre() + " " +
-                    p.getCategoria() + " " +
-                    p.getMarca() + " " +
-                    p.getTags()
-            );
+            String nombre =
+                    normalizar(p.getNombre());
 
-            String[] palabrasUsuario = texto.split("\\s+");
+            String categoria =
+                    normalizar(p.getCategoria());
+
+            String marca =
+                    normalizar(p.getMarca());
+
+            String tags =
+                    normalizar(p.getTags());
+
+            String contenido =
+                    nombre + " " +
+                    categoria + " " +
+                    marca + " " +
+                    tags;
+
+            String[] palabrasUsuario =
+                    texto.split("\\s+");
 
             for (String palabra : palabrasUsuario) {
 
-                if (contenido.contains(palabra)) {
+                /*
+                SI LA PALABRA ESTÁ EN EL NOMBRE
+                DA MUCHOS MÁS PUNTOS
+                */
+                if (nombre.contains(palabra)) {
+                    score += 100;
+                }
+
+                /*
+                TAGS
+                */
+                else if (tags.contains(palabra)) {
+                    score += 40;
+                }
+
+                /*
+                CATEGORÍA
+                */
+                else if (categoria.contains(palabra)) {
+                    score += 30;
+                }
+
+                /*
+                MARCA
+                */
+                else if (marca.contains(palabra)) {
+                    score += 20;
+                }
+
+                /*
+                CONTENIDO GENERAL
+                */
+                else if (contenido.contains(palabra)) {
                     score += 10;
                 }
             }
 
-            // MÁS STOCK = MÁS SCORE
-            score += p.getStock() / 10;
-
-            // PRODUCTO BARATO
+            /*
+            PRODUCTOS BARATOS
+            */
             if (quiereBarato) {
 
                 if (p.getPrecio().doubleValue() <= 100) {
-                    score += 30;
+                    score += 50;
                 }
                 else if (p.getPrecio().doubleValue() <= 200) {
-                    score += 15;
-                }
-            }
-
-            // PRODUCTO PREMIUM
-            if (quierePremium) {
-
-                if (p.getPrecio().doubleValue() >= 500) {
                     score += 25;
                 }
             }
 
+            /*
+            PRODUCTOS PREMIUM
+            */
+            if (quierePremium) {
+
+                if (p.getPrecio().doubleValue() >= 500) {
+                    score += 40;
+                }
+            }
+
+            /*
+            MÁS STOCK
+            */
+            score += p.getStock() / 10;
+
+            /*
+            MEJOR SCORE
+            */
             if (score > mejorScore) {
 
                 mejorScore = score;
@@ -304,11 +357,7 @@ public class ProductoDAO {
             }
         }
 
-        if (mejorScore >= 10) {
-            return mejorProducto;
-        }
-
-        return null;
+        return mejorProducto;
     }
 
     private String normalizar(String texto) {
