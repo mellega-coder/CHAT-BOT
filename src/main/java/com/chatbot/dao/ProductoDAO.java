@@ -11,25 +11,45 @@ import java.util.List;
 public class ProductoDAO {
 
     private Producto map(ResultSet rs) throws SQLException {
+
         return new Producto(
                 rs.getInt("id"),
                 rs.getString("nombre"),
                 rs.getBigDecimal("precio"),
                 rs.getInt("stock"),
                 rs.getString("descripcion"),
-                rs.getBoolean("estado")
+                rs.getBoolean("estado"),
+                rs.getString("categoria"),
+                rs.getString("marca"),
+                rs.getString("tags")
         );
     }
 
     public List<Producto> listarActivos() {
+
         List<Producto> lista = new ArrayList<>();
 
-        String sql = "SELECT id, nombre, precio, stock, descripcion, estado " +
-                     "FROM productos WHERE estado = 1 ORDER BY id DESC";
+        String sql = """
+                SELECT
+                id,
+                nombre,
+                precio,
+                stock,
+                descripcion,
+                estado,
+                categoria,
+                marca,
+                tags
+                FROM productos
+                WHERE estado = 1
+                ORDER BY id DESC
+                """;
 
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()
+        ) {
 
             while (rs.next()) {
                 lista.add(map(rs));
@@ -46,11 +66,14 @@ public class ProductoDAO {
 
         String sql = "SELECT COUNT(*) FROM productos WHERE estado = 1";
 
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()
+        ) {
 
             rs.next();
+
             return rs.getInt(1);
 
         } catch (SQLException e) {
@@ -60,11 +83,25 @@ public class ProductoDAO {
 
     public Producto buscarPorId(int id) {
 
-        String sql = "SELECT id, nombre, precio, stock, descripcion, estado " +
-                     "FROM productos WHERE id = ?";
+        String sql = """
+                SELECT
+                id,
+                nombre,
+                precio,
+                stock,
+                descripcion,
+                estado,
+                categoria,
+                marca,
+                tags
+                FROM productos
+                WHERE id = ?
+                """;
 
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
             ps.setInt(1, id);
 
@@ -84,17 +121,32 @@ public class ProductoDAO {
 
     public void guardar(Producto p) {
 
-        String sql = "INSERT INTO productos(nombre, precio, stock, descripcion, estado) " +
-                     "VALUES(?,?,?,?,?)";
+        String sql = """
+                INSERT INTO productos(
+                nombre,
+                precio,
+                stock,
+                descripcion,
+                estado,
+                categoria,
+                marca,
+                tags
+                )
+                VALUES(?,?,?,?,?,?,?,?)
+                """;
 
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
             ps.setString(1, p.getNombre());
 
             ps.setBigDecimal(
                     2,
-                    p.getPrecio() == null ? BigDecimal.ZERO : p.getPrecio()
+                    p.getPrecio() == null
+                            ? BigDecimal.ZERO
+                            : p.getPrecio()
             );
 
             ps.setInt(3, p.getStock());
@@ -102,6 +154,12 @@ public class ProductoDAO {
             ps.setString(4, p.getDescripcion());
 
             ps.setBoolean(5, p.isActivo());
+
+            ps.setString(6, p.getCategoria());
+
+            ps.setString(7, p.getMarca());
+
+            ps.setString(8, p.getTags());
 
             ps.executeUpdate();
 
@@ -112,18 +170,31 @@ public class ProductoDAO {
 
     public void actualizar(Producto p) {
 
-        String sql = "UPDATE productos " +
-                     "SET nombre=?, precio=?, stock=?, descripcion=?, estado=? " +
-                     "WHERE id=?";
+        String sql = """
+                UPDATE productos SET
+                nombre=?,
+                precio=?,
+                stock=?,
+                descripcion=?,
+                estado=?,
+                categoria=?,
+                marca=?,
+                tags=?
+                WHERE id=?
+                """;
 
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
             ps.setString(1, p.getNombre());
 
             ps.setBigDecimal(
                     2,
-                    p.getPrecio() == null ? BigDecimal.ZERO : p.getPrecio()
+                    p.getPrecio() == null
+                            ? BigDecimal.ZERO
+                            : p.getPrecio()
             );
 
             ps.setInt(3, p.getStock());
@@ -132,7 +203,13 @@ public class ProductoDAO {
 
             ps.setBoolean(5, p.isActivo());
 
-            ps.setInt(6, p.getId());
+            ps.setString(6, p.getCategoria());
+
+            ps.setString(7, p.getMarca());
+
+            ps.setString(8, p.getTags());
+
+            ps.setInt(9, p.getId());
 
             ps.executeUpdate();
 
@@ -145,8 +222,10 @@ public class ProductoDAO {
 
         String sql = "UPDATE productos SET estado = 0 WHERE id = ?";
 
-        try (Connection con = Conexion.getConexion();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (
+                Connection con = Conexion.getConexion();
+                PreparedStatement ps = con.prepareStatement(sql)
+        ) {
 
             ps.setInt(1, id);
 
@@ -159,17 +238,25 @@ public class ProductoDAO {
 
     public Producto buscarCoincidencia(String mensaje) {
 
-    String texto = normalizar(mensaje);
+        String texto = normalizar(mensaje);
 
-    Producto mejorProducto = null;
-    int mejorScore = Integer.MAX_VALUE;
+        Producto mejorProducto = null;
 
-    for (Producto p : listarActivos()) {
+        int mejorScore = Integer.MAX_VALUE;
 
-            String nombre = normalizar(p.getNombre());
+        for (Producto p : listarActivos()) {
+
+            String contenidoProducto = normalizar(
+                    p.getNombre() + " " +
+                    p.getCategoria() + " " +
+                    p.getMarca() + " " +
+                    p.getTags()
+            );
 
             String[] palabrasUsuario = texto.split("\\s+");
-            String[] palabrasProducto = nombre.split("\\s+");
+
+            String[] palabrasProducto =
+                    contenidoProducto.split("\\s+");
 
             for (String palabraUsuario : palabrasUsuario) {
 
@@ -181,7 +268,9 @@ public class ProductoDAO {
                     );
 
                     if (distancia < mejorScore) {
+
                         mejorScore = distancia;
+
                         mejorProducto = p;
                     }
                 }
@@ -201,7 +290,10 @@ public class ProductoDAO {
             return "";
         }
 
-        String n = Normalizer.normalize(texto, Normalizer.Form.NFD);
+        String n = Normalizer.normalize(
+                texto,
+                Normalizer.Form.NFD
+        );
 
         n = n.replaceAll("\\p{M}", "");
 
@@ -209,7 +301,9 @@ public class ProductoDAO {
     }
 
     private int distanciaLevenshtein(String a, String b) {
-        int[][] dp = new int[a.length() + 1][b.length() + 1];
+
+        int[][] dp =
+                new int[a.length() + 1][b.length() + 1];
 
         for (int i = 0; i <= a.length(); i++) {
             dp[i][0] = i;
@@ -220,9 +314,13 @@ public class ProductoDAO {
         }
 
         for (int i = 1; i <= a.length(); i++) {
+
             for (int j = 1; j <= b.length(); j++) {
 
-                int costo = (a.charAt(i - 1) == b.charAt(j - 1)) ? 0 : 1;
+                int costo =
+                        (a.charAt(i - 1) == b.charAt(j - 1))
+                                ? 0
+                                : 1;
 
                 dp[i][j] = Math.min(
                         Math.min(
