@@ -197,6 +197,19 @@ private String aplicarPersonalidad(String mensaje) {
         }
         }
 
+        if (buscaProductoInexistente(texto, producto)) {
+
+        String respuesta = """
+        😅 Actualmente no contamos con ese producto exacto.
+
+        Pero sí tenemos otras opciones gamer disponibles 🎮
+
+        ¿Te gustaría que te recomiende algo similar? 👌
+        """;
+
+        return aplicarPersonalidad(respuesta);
+        }
+
         /*
          SI ENCUENTRA PRODUCTO
         */
@@ -542,6 +555,45 @@ private String aplicarPersonalidad(String mensaje) {
                 texto.contains("otro producto") ||
                 texto.contains("recomiendame otro") ||
                 texto.contains("recomiéndame otro");
+        }
+
+        private boolean buscaProductoInexistente(
+                String texto,
+                Producto producto
+        ) {
+
+        texto = texto.toLowerCase();
+
+        String[] productosBuscados = {
+                "laptop",
+                "monitor",
+                "teclado",
+                "mouse",
+                "silla",
+                "pc",
+                "procesador",
+                "audifonos",
+                "microfono",
+                "camara"
+        };
+
+        for (String p : productosBuscados) {
+
+                if (texto.contains(p)) {
+
+                if (
+                        producto == null ||
+                        !producto.getNombre()
+                                .toLowerCase()
+                                .contains(p)
+                ) {
+
+                        return true;
+                }
+                }
+        }
+
+        return false;
         }
 
         private boolean mensajeBuscaProducto(String texto) {
