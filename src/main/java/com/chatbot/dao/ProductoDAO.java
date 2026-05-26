@@ -242,11 +242,23 @@ public class ProductoDAO {
 
         Producto mejorProducto = null;
 
-        int mejorScore = Integer.MAX_VALUE;
+        int mejorScore = -1;
+
+        boolean quiereBarato =
+                texto.contains("barato") ||
+                texto.contains("economico") ||
+                texto.contains("económico");
+
+        boolean quierePremium =
+                texto.contains("premium") ||
+                texto.contains("pro") ||
+                texto.contains("alta gama");
 
         for (Producto p : listarActivos()) {
 
-            String contenidoProducto = normalizar(
+            int score = 0;
+
+            String contenido = normalizar(
                     p.getNombre() + " " +
                     p.getCategoria() + " " +
                     p.getMarca() + " " +
@@ -255,33 +267,44 @@ public class ProductoDAO {
 
             String[] palabrasUsuario = texto.split("\\s+");
 
-            String[] palabrasProducto =
-                    contenidoProducto.split("\\s+");
+            for (String palabra : palabrasUsuario) {
 
-            for (String palabraUsuario : palabrasUsuario) {
-
-                for (String palabraProducto : palabrasProducto) {
-
-                    int distancia = distanciaLevenshtein(
-                            palabraUsuario,
-                            palabraProducto
-                    );
-
-                    if (distancia < mejorScore) {
-
-                        mejorScore = distancia;
-
-                        mejorProducto = p;
-                    }
+                if (contenido.contains(palabra)) {
+                    score += 10;
                 }
+            }
+
+            // MÁS STOCK = MÁS SCORE
+            score += p.getStock() / 10;
+
+            // PRODUCTO BARATO
+            if (quiereBarato) {
+
+                if (p.getPrecio().doubleValue() <= 100) {
+                    score += 30;
+                }
+                else if (p.getPrecio().doubleValue() <= 200) {
+                    score += 15;
+                }
+            }
+
+            // PRODUCTO PREMIUM
+            if (quierePremium) {
+
+                if (p.getPrecio().doubleValue() >= 500) {
+                    score += 25;
+                }
+            }
+
+            if (score > mejorScore) {
+
+                mejorScore = score;
+
+                mejorProducto = p;
             }
         }
 
-        if (mejorScore <= 4) {
-            return mejorProducto;
-        }
-
-        return null;
+        return mejorProducto;
     }
 
     private String normalizar(String texto) {
