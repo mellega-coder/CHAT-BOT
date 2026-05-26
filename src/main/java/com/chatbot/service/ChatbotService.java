@@ -1,16 +1,15 @@
 package com.chatbot.service;
 
 import com.chatbot.dao.ConversacionDAO;
-import com.chatbot.model.Conversacion;
 import com.chatbot.dao.MensajeDAO;
 import com.chatbot.dao.ProductoDAO;
 import com.chatbot.dao.RespuestaDAO;
+import com.chatbot.model.Conversacion;
 import com.chatbot.model.Producto;
 import com.chatbot.model.Respuesta;
-import com.chatbot.service.OpenAIService;
-import java.util.Random;
 
 import java.util.List;
+import java.util.Random;
 
 public class ChatbotService {
 
@@ -19,9 +18,11 @@ public class ChatbotService {
     private final MensajeDAO mensajeDAO = new MensajeDAO();
     private final ConversacionDAO conversacionDAO = new ConversacionDAO();
     private final OpenAIService openAIService = new OpenAIService();
+
     private final Random random = new Random();
 
     private String saludoAleatorio() {
+
         String[] saludos = {
                 "¡Claro! 😊",
                 "¡Sí! 🔥",
@@ -30,6 +31,7 @@ public class ChatbotService {
                 "Excelente opción 🚀",
                 "¡Tenemos justo lo que buscas! 🎮"
         };
+
         return saludos[random.nextInt(saludos.length)];
     }
 
@@ -40,18 +42,22 @@ public class ChatbotService {
         }
 
         String texto = mensaje.toLowerCase();
+
         String intencion = detectarIntencion(texto);
+
         Producto producto = productoDAO.buscarCoincidencia(texto);
+
         /*
-        SI NO ENCUENTRA PRODUCTO,
-        USA EL ÚLTIMO DE LA CONVERSACIÓN
+         SI NO ENCUENTRA PRODUCTO,
+         USA EL ÚLTIMO PRODUCTO DE LA CONVERSACIÓN
         */
         if (producto == null) {
 
             Conversacion conversacion =
                     conversacionDAO.obtener("cliente1");
 
-            if (conversacion != null) {
+            if (conversacion != null &&
+                    conversacion.getUltimoProductoId() > 0) {
 
                 producto = productoDAO.buscarPorId(
                         conversacion.getUltimoProductoId()
@@ -59,6 +65,9 @@ public class ChatbotService {
             }
         }
 
+        /*
+         SI ENCUENTRA PRODUCTO
+        */
         if (producto != null) {
 
             String respuesta;
@@ -66,22 +75,26 @@ public class ChatbotService {
             switch (intencion) {
 
                 case "PRECIO":
+
                     respuesta = """
                     %s
 
-                    El producto %s tiene un precio de S/ %.2f 💰
+                    El producto 🛒 %s
 
-                    Actualmente tenemos %d unidades disponibles.
+                    tiene un precio de 💰 S/ %.2f
+
+                    📦 Actualmente tenemos %d unidades disponibles.
                     """.formatted(
                             saludoAleatorio(),
                             producto.getNombre(),
                             producto.getPrecio(),
                             producto.getStock()
-                );
+                    );
 
-                break;
+                    break;
 
                 case "STOCK":
+
                     respuesta = """
                     %s
 
@@ -89,16 +102,17 @@ public class ChatbotService {
 
                     🛒 %s
 
-                    📦 Stock actual: %d unidades
+                    📦 Stock actual: %d unidades.
                     """.formatted(
                             saludoAleatorio(),
                             producto.getNombre(),
                             producto.getStock()
-                );
+                    );
 
-                break;
+                    break;
 
                 case "COMPRA":
+
                     respuesta = """
                     %s
 
@@ -115,11 +129,32 @@ public class ChatbotService {
                             producto.getNombre(),
                             producto.getPrecio(),
                             producto.getStock()
-                );
+                    );
 
-                break;
+                    break;
+
+                case "ENVIO":
+
+                    respuesta = """
+                    %s
+
+                    Sí 🚚 realizamos envíos para:
+
+                    🛒 %s
+
+                    💰 Precio: S/ %.2f
+
+                    ¿Deseas coordinar entrega o más información? 😄
+                    """.formatted(
+                            saludoAleatorio(),
+                            producto.getNombre(),
+                            producto.getPrecio()
+                    );
+
+                    break;
 
                 default:
+
                     respuesta = """
                     %s
 
@@ -138,37 +173,61 @@ public class ChatbotService {
                             producto.getPrecio(),
                             producto.getStock(),
                             producto.getDescripcion()
-                );
+                    );
+
+                    break;
             }
 
+            /*
+             GUARDA CONTEXTO DE CONVERSACIÓN
+            */
             conversacionDAO.guardarContexto(
                     "cliente1",
                     producto.getId(),
                     intencion
             );
-            
-            mensajeDAO.guardar(mensaje, respuesta);
+
+            /*
+             GUARDA MENSAJE
+            */
+            mensajeDAO.guardar(
+                    mensaje,
+                    respuesta
+            );
 
             return respuesta;
         }
 
-        List<Respuesta> respuestas = respuestaDAO.listarActivos();
+        /*
+         RESPUESTAS PREDEFINIDAS
+        */
+        List<Respuesta> respuestas =
+                respuestaDAO.listarActivos();
 
         for (Respuesta r : respuestas) {
 
-            String[] palabras = r.getPalabrasClave().split(",");
+            String[] palabras =
+                    r.getPalabrasClave().split(",");
 
             for (String palabra : palabras) {
 
-                if (texto.contains(palabra.trim().toLowerCase())) {
+                if (texto.contains(
+                        palabra.trim().toLowerCase()
+                )) {
 
-                    mensajeDAO.guardar(mensaje, r.getRespuesta());
+                    mensajeDAO.guardar(
+                            mensaje,
+                            r.getRespuesta()
+                    );
 
                     return r.getRespuesta();
                 }
             }
         }
 
+        /*
+         IA OPENAI
+        */
         String respuestaIA = openAIService.preguntar(
                 """
                 Cliente escribió:
@@ -177,18 +236,25 @@ public class ChatbotService {
                 Productos disponibles:
                 %s
 
-                Responde como un vendedor amable y profesional.
+                Responde como un vendedor amable, natural y profesional.
+                Recomienda productos adecuados según lo que busca el cliente.
                 """.formatted(
                         mensaje,
                         obtenerProductosTexto()
                 )
         );
 
-        mensajeDAO.guardar(mensaje, respuestaIA);
+        mensajeDAO.guardar(
+                mensaje,
+                respuestaIA
+        );
 
         return respuestaIA;
     }
 
+    /*
+     CONVIERTE PRODUCTOS A TEXTO PARA IA
+    */
     private String obtenerProductosTexto() {
 
         StringBuilder sb = new StringBuilder();
@@ -200,12 +266,18 @@ public class ChatbotService {
 
             sb.append("""
                     Producto: %s
+                    Categoría: %s
+                    Marca: %s
+                    Tags: %s
                     Precio: %s
                     Stock: %d
                     Descripción: %s
 
                     """.formatted(
                     p.getNombre(),
+                    p.getCategoria(),
+                    p.getMarca(),
+                    p.getTags(),
                     p.getPrecio(),
                     p.getStock(),
                     p.getDescripcion()
@@ -215,6 +287,9 @@ public class ChatbotService {
         return sb.toString();
     }
 
+    /*
+     DETECTAR INTENCIÓN
+    */
     private String detectarIntencion(String texto) {
 
         texto = texto.toLowerCase();
@@ -224,6 +299,7 @@ public class ChatbotService {
                 texto.contains("cuesta") ||
                 texto.contains("vale")
         ) {
+
             return "PRECIO";
         }
 
@@ -232,6 +308,7 @@ public class ChatbotService {
                 texto.contains("disponible") ||
                 texto.contains("hay")
         ) {
+
             return "STOCK";
         }
 
@@ -239,6 +316,7 @@ public class ChatbotService {
                 texto.contains("comprar") ||
                 texto.contains("quiero")
         ) {
+
             return "COMPRA";
         }
 
@@ -246,6 +324,7 @@ public class ChatbotService {
                 texto.contains("envio") ||
                 texto.contains("delivery")
         ) {
+
             return "ENVIO";
         }
 
