@@ -410,4 +410,47 @@ public class ProductoDAO {
 
         return dp[a.length()][b.length()];
     }
+
+    public Producto buscarAlternativa(
+            String categoria,
+            String preferencia
+    ) {
+
+        List<Producto> productos =
+                listarActivos();
+
+        Producto mejor = null;
+
+        for (Producto p : productos) {
+
+            if (
+                    p.getCategoria() != null &&
+                    p.getCategoria().equalsIgnoreCase(categoria)
+            ) {
+
+                if (
+                        preferencia.equals("BARATO") &&
+                        p.getPrecio().doubleValue() <= 300
+                ) {
+
+                    return p;
+                }
+
+                if (
+                        preferencia.equals("PREMIUM") &&
+                        p.getPrecio().doubleValue() >= 500
+                ) {
+
+                    return p;
+                }
+
+                if (mejor == null) {
+                    mejor = p;
+                }
+            }
+        }
+
+        return mejor;
+    }
+
 }

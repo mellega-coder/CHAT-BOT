@@ -126,15 +126,49 @@ private String aplicarPersonalidad(String mensaje) {
                 texto.contains("me interesa");
 
         if (producto == null && usarContexto) {
-
         Conversacion conversacion =
                 conversacionDAO.obtener("cliente1");
 
-        if (conversacion != null) {
 
+        if (conversacion != null) {
                 producto = productoDAO.buscarPorId(
                         conversacion.getUltimoProductoId()
                 );
+        }
+        }
+
+        if (quiereAlternativa(texto)) {
+        Conversacion conv =
+                conversacionDAO.obtener("cliente1");
+
+        if (conv != null) {
+
+                Producto alternativo =
+                        productoDAO.buscarAlternativa(
+                                conv.getUltimaCategoria(),
+                                conv.getPreferenciaPrecio()
+                        );
+
+                if (alternativo != null) {
+
+                String respuesta = """
+                😊 También podría interesarte esta opción:
+
+                🛒 %s
+
+                💰 Precio: S/ %.2f
+                📦 Stock: %d unidades
+
+                📄 %s
+                """.formatted(
+                        alternativo.getNombre(),
+                        alternativo.getPrecio(),
+                        alternativo.getStock(),
+                        alternativo.getDescripcion()
+                );
+
+                return aplicarPersonalidad(respuesta);
+                }
         }
         }
 
@@ -279,11 +313,13 @@ private String aplicarPersonalidad(String mensaje) {
             /*
              GUARDA CONTEXTO DE CONVERSACIÓN
             */
-            conversacionDAO.guardarContexto(
-                    "cliente1",
-                    producto.getId(),
-                    intencion
-            );
+        conversacionDAO.guardarContexto(
+        "cliente1",
+        producto.getId(),
+        intencion,
+        producto.getCategoria(),
+        detectarPreferenciaPrecio(texto)
+        );
 
             /*
              GUARDA MENSAJE
@@ -428,4 +464,40 @@ private String aplicarPersonalidad(String mensaje) {
 
         return "GENERAL";
     }
+
+        private String detectarPreferenciaPrecio(String texto) {
+
+        texto = texto.toLowerCase();
+
+        if (
+                texto.contains("barato") ||
+                texto.contains("económico") ||
+                texto.contains("economico")
+        ) {
+                return "BARATO";
+        }
+
+        if (
+                texto.contains("premium") ||
+                texto.contains("alta gama") ||
+                texto.contains("pro")
+        ) {
+                return "PREMIUM";
+        }
+
+        return "NORMAL";
+        }
+
+        private boolean quiereAlternativa(String texto) {
+
+        texto = texto.toLowerCase();
+
+        return
+                texto.contains("más barato") ||
+                texto.contains("mas barato") ||
+                texto.contains("otro modelo") ||
+                texto.contains("otra opción") ||
+                texto.contains("algo mejor");
+        }
+
 }
