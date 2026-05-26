@@ -304,7 +304,11 @@ public class ProductoDAO {
             }
         }
 
-        return mejorProducto;
+        if (mejorScore >= 10) {
+            return mejorProducto;
+        }
+
+        return null;
     }
 
     private String normalizar(String texto) {

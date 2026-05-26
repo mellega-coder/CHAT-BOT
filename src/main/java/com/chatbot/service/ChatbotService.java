@@ -51,18 +51,27 @@ public class ChatbotService {
          SI NO ENCUENTRA PRODUCTO,
          USA EL ÚLTIMO PRODUCTO DE LA CONVERSACIÓN
         */
-        if (producto == null) {
+        boolean usarContexto =
+                texto.contains("cuesta") ||
+                texto.contains("precio") ||
+                texto.contains("stock") ||
+                texto.contains("disponible") ||
+                texto.contains("ese") ||
+                texto.contains("esa") ||
+                texto.contains("lo quiero") ||
+                texto.contains("me interesa");
 
-            Conversacion conversacion =
-                    conversacionDAO.obtener("cliente1");
+        if (producto == null && usarContexto) {
 
-            if (conversacion != null &&
-                    conversacion.getUltimoProductoId() > 0) {
+        Conversacion conversacion =
+                conversacionDAO.obtener("cliente1");
+
+        if (conversacion != null) {
 
                 producto = productoDAO.buscarPorId(
                         conversacion.getUltimoProductoId()
                 );
-            }
+        }
         }
 
         /*
