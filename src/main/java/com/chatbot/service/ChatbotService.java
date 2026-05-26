@@ -7,6 +7,7 @@ import com.chatbot.dao.RespuestaDAO;
 import com.chatbot.model.Conversacion;
 import com.chatbot.model.Producto;
 import com.chatbot.model.Respuesta;
+import com.chatbot.model.PersonalidadChatbot;
 
 import java.util.List;
 import java.util.Random;
@@ -18,8 +19,8 @@ public class ChatbotService {
     private final MensajeDAO mensajeDAO = new MensajeDAO();
     private final ConversacionDAO conversacionDAO = new ConversacionDAO();
     private final OpenAIService openAIService = new OpenAIService();
-
     private final Random random = new Random();
+    private final PersonalidadChatbot personalidad = PersonalidadChatbot.GAMER;
 
     private String saludoAleatorio() {
 
@@ -46,7 +47,57 @@ private String generarCierre() {
         };
 
         return cierres[random.nextInt(cierres.length)];
-        }
+}
+
+private String aplicarPersonalidad(String mensaje) {
+
+    switch (personalidad) {
+
+        case GAMER:
+
+            return """
+            🎮 %s
+            
+            🔥 Aprovecha antes que se agote.
+            """.formatted(mensaje);
+
+        case ELEGANTE:
+
+            return """
+            ✨ %s
+            
+            Será un gusto ayudarte con cualquier consulta adicional.
+            """.formatted(mensaje);
+
+        case MARKETPLACE:
+
+            return """
+            🛒 %s
+            
+            📩 Escríbenos para coordinar compra o entrega.
+            """.formatted(mensaje);
+
+        case SOPORTE:
+
+            return """
+            🛠️ %s
+            
+            Si necesitas especificaciones técnicas,
+            puedo ayudarte.
+            """.formatted(mensaje);
+
+        case PREMIUM:
+
+            return """
+            👑 %s
+            
+            Producto altamente recomendado para una experiencia premium.
+            """.formatted(mensaje);
+
+        default:
+            return mensaje;
+    }
+}
 
     public String procesarMensaje(String mensaje) {
 
@@ -242,7 +293,7 @@ private String generarCierre() {
                     respuesta
             );
 
-            return respuesta;
+            return aplicarPersonalidad(respuesta);
         }
 
         /*
