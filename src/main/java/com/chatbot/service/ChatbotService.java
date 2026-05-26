@@ -1,5 +1,7 @@
 package com.chatbot.service;
 
+import com.chatbot.dao.ConversacionDAO;
+import com.chatbot.model.Conversacion;
 import com.chatbot.dao.MensajeDAO;
 import com.chatbot.dao.ProductoDAO;
 import com.chatbot.dao.RespuestaDAO;
@@ -15,6 +17,7 @@ public class ChatbotService {
     private final ProductoDAO productoDAO = new ProductoDAO();
     private final RespuestaDAO respuestaDAO = new RespuestaDAO();
     private final MensajeDAO mensajeDAO = new MensajeDAO();
+    private final ConversacionDAO conversacionDAO = new ConversacionDAO();
     private final OpenAIService openAIService = new OpenAIService();
     private final Random random = new Random();
 
@@ -39,6 +42,22 @@ public class ChatbotService {
         String texto = mensaje.toLowerCase();
         String intencion = detectarIntencion(texto);
         Producto producto = productoDAO.buscarCoincidencia(texto);
+        /*
+        SI NO ENCUENTRA PRODUCTO,
+        USA EL ÚLTIMO DE LA CONVERSACIÓN
+        */
+        if (producto == null) {
+
+            Conversacion conversacion =
+                    conversacionDAO.obtener("cliente1");
+
+            if (conversacion != null) {
+
+                producto = productoDAO.buscarPorId(
+                        conversacion.getUltimoProductoId()
+                );
+            }
+        }
 
         if (producto != null) {
 
@@ -122,6 +141,12 @@ public class ChatbotService {
                 );
             }
 
+            conversacionDAO.guardarContexto(
+                    "cliente1",
+                    producto.getId(),
+                    intencion
+            );
+            
             mensajeDAO.guardar(mensaje, respuesta);
 
             return respuesta;
