@@ -6,6 +6,7 @@ import com.chatbot.dao.RespuestaDAO;
 import com.chatbot.model.Producto;
 import com.chatbot.model.Respuesta;
 import com.chatbot.service.OpenAIService;
+import java.util.Random;
 
 import java.util.List;
 
@@ -15,6 +16,19 @@ public class ChatbotService {
     private final RespuestaDAO respuestaDAO = new RespuestaDAO();
     private final MensajeDAO mensajeDAO = new MensajeDAO();
     private final OpenAIService openAIService = new OpenAIService();
+    private final Random random = new Random();
+
+    private String saludoAleatorio() {
+        String[] saludos = {
+                "¡Claro! 😊",
+                "¡Sí! 🔥",
+                "Perfecto 👍",
+                "Buena elección 😎",
+                "Excelente opción 🚀",
+                "¡Tenemos justo lo que buscas! 🎮"
+        };
+        return saludos[random.nextInt(saludos.length)];
+    }
 
     public String procesarMensaje(String mensaje) {
 
@@ -33,63 +47,79 @@ public class ChatbotService {
             switch (intencion) {
 
                 case "PRECIO":
-
                     respuesta = """
-                    El producto %s cuesta S/ %.2f
-                    """.formatted(
-                            producto.getNombre(),
-                            producto.getPrecio()
-                    );
-
-                    break;
-
-                case "STOCK":
-
-                    respuesta = """
-                    Sí tenemos disponible:
-
-                    Producto: %s
-                    Stock actual: %d unidades
-                    """.formatted(
-                            producto.getNombre(),
-                            producto.getStock()
-                    );
-
-                    break;
-
-                case "COMPRA":
-
-                    respuesta = """
-                    Puedes comprar ahora mismo:
-
                     %s
-                    Precio: S/ %.2f
-                    Stock disponible: %d
+
+                    El producto %s tiene un precio de S/ %.2f 💰
+
+                    Actualmente tenemos %d unidades disponibles.
                     """.formatted(
+                            saludoAleatorio(),
                             producto.getNombre(),
                             producto.getPrecio(),
                             producto.getStock()
-                    );
+                );
 
-                    break;
+                break;
+
+                case "STOCK":
+                    respuesta = """
+                    %s
+
+                    Sí 😊 tenemos disponible:
+
+                    🛒 %s
+
+                    📦 Stock actual: %d unidades
+                    """.formatted(
+                            saludoAleatorio(),
+                            producto.getNombre(),
+                            producto.getStock()
+                );
+
+                break;
+
+                case "COMPRA":
+                    respuesta = """
+                    %s
+
+                    Puedes comprar ahora mismo:
+
+                    🛒 %s
+
+                    💰 Precio: S/ %.2f
+                    📦 Stock disponible: %d unidades
+
+                    ¿Te gustaría más información? 😄
+                    """.formatted(
+                            saludoAleatorio(),
+                            producto.getNombre(),
+                            producto.getPrecio(),
+                            producto.getStock()
+                );
+
+                break;
 
                 default:
-
                     respuesta = """
+                    %s
+
                     Tenemos disponible:
 
-                    Producto: %s
-                    Precio: S/ %.2f
-                    Stock: %d
+                    🛒 %s
 
-                    Descripción:
+                    💰 Precio: S/ %.2f
+                    📦 Stock: %d unidades
+
+                    📄 Descripción:
                     %s
                     """.formatted(
+                            saludoAleatorio(),
                             producto.getNombre(),
                             producto.getPrecio(),
                             producto.getStock(),
                             producto.getDescripcion()
-                    );
+                );
             }
 
             mensajeDAO.guardar(mensaje, respuesta);
