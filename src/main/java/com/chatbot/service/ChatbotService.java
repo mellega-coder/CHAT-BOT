@@ -109,6 +109,30 @@ private String aplicarPersonalidad(String mensaje) {
 
         String intencion = detectarIntencion(texto);
 
+        /*
+        SI EL MENSAJE NO BUSCA PRODUCTOS,
+        RESPONDE CON IA NATURAL
+        */
+        if (!mensajeBuscaProducto(texto)) {
+
+        String respuestaIA =
+                openAIService.preguntar(
+                        """
+                        Responde como un vendedor gamer amable y natural.
+
+                        Cliente:
+                        "%s"
+                        """.formatted(mensaje)
+                );
+
+        mensajeDAO.guardar(
+                mensaje,
+                respuestaIA
+        );
+
+        return respuestaIA;
+        }
+
         Producto producto = productoDAO.buscarCoincidencia(texto);
 
         /*
@@ -146,7 +170,8 @@ private String aplicarPersonalidad(String mensaje) {
                 Producto alternativo =
                         productoDAO.buscarAlternativa(
                                 conv.getUltimaCategoria(),
-                                conv.getPreferenciaPrecio()
+                                conv.getPreferenciaPrecio(),
+                                conv.getUltimoProductoId()
                         );
 
                 if (alternativo != null) {
@@ -313,12 +338,29 @@ private String aplicarPersonalidad(String mensaje) {
             /*
              GUARDA CONTEXTO DE CONVERSACIÓN
             */
+        String preferencia = "NORMAL";
+
+        if (
+                texto.contains("barato") ||
+                texto.contains("economico") ||
+                texto.contains("económico")
+        ) {
+        preferencia = "BARATO";
+        }
+
+        if (
+                texto.contains("premium") ||
+                texto.contains("pro")
+        ) {
+        preferencia = "PREMIUM";
+        }
+
         conversacionDAO.guardarContexto(
-        "cliente1",
-        producto.getId(),
-        intencion,
-        producto.getCategoria(),
-        detectarPreferenciaPrecio(texto)
+                "cliente1",
+                producto.getId(),
+                intencion,
+                producto.getCategoria(),
+                preferencia
         );
 
             /*
@@ -447,11 +489,10 @@ private String aplicarPersonalidad(String mensaje) {
         }
 
         if (
-                texto.contains("comprar") ||
-                texto.contains("quiero")
+        texto.contains("comprar")
         ) {
 
-            return "COMPRA";
+        return "COMPRA";
         }
 
         if (
@@ -493,11 +534,30 @@ private String aplicarPersonalidad(String mensaje) {
         texto = texto.toLowerCase();
 
         return
-                texto.contains("más barato") ||
-                texto.contains("mas barato") ||
-                texto.contains("otro modelo") ||
+                texto.contains("otra opcion") ||
                 texto.contains("otra opción") ||
-                texto.contains("algo mejor");
+                texto.contains("algo mas") ||
+                texto.contains("algo más") ||
+                texto.contains("alternativa") ||
+                texto.contains("otro producto") ||
+                texto.contains("recomiendame otro") ||
+                texto.contains("recomiéndame otro");
+        }
+
+        private boolean mensajeBuscaProducto(String texto) {
+
+        texto = texto.toLowerCase();
+
+        return
+                texto.contains("monitor") ||
+                texto.contains("mouse") ||
+                texto.contains("teclado") ||
+                texto.contains("laptop") ||
+                texto.contains("silla") ||
+                texto.contains("gamer") ||
+                texto.contains("auricular") ||
+                texto.contains("microfono") ||
+                texto.contains("micrófono");
         }
 
 }

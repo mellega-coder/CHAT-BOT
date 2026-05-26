@@ -1,7 +1,7 @@
 package com.chatbot.model;
 
 public class Conversacion {
-
+    
     private String usuarioId;
     private int ultimoProductoId;
     private String ultimaIntencion;

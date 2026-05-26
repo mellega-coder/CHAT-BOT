@@ -10,43 +10,44 @@ import java.sql.SQLException;
 public class ConversacionDAO {
 
     public void guardarContexto(
-            String usuarioId,
+            String usuario,
             int productoId,
             String intencion,
             String categoria,
-            String preferenciaPrecio
+            String preferencia
     ) {
 
         String sql = """
-            INSERT INTO conversaciones(
-                usuario_id,
-                ultimo_producto_id,
-                ultima_intencion,
-                ultima_categoria,
-                preferencia_precio
-            )
-            VALUES(?,?,?,?,?)
-            ON DUPLICATE KEY UPDATE
-                ultimo_producto_id = VALUES(ultimo_producto_id),
-                ultima_intencion = VALUES(ultima_intencion),
-                ultima_categoria = VALUES(ultima_categoria),
-                preferencia_precio = VALUES(preferencia_precio)
-            """;
+                INSERT INTO conversaciones(
+                    usuario,
+                    ultimo_producto_id,
+                    ultima_intencion,
+                    ultima_categoria,
+                    preferencia_precio
+                )
+                VALUES(?,?,?,?,?)
+                ON DUPLICATE KEY UPDATE
+                    ultimo_producto_id = VALUES(ultimo_producto_id),
+                    ultima_intencion = VALUES(ultima_intencion),
+                    ultima_categoria = VALUES(ultima_categoria),
+                    preferencia_precio = VALUES(preferencia_precio)
+                """;
 
         try (
                 Connection con = Conexion.getConexion();
                 PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, usuarioId);
+            ps.setString(1, usuario);
             ps.setInt(2, productoId);
             ps.setString(3, intencion);
             ps.setString(4, categoria);
-            ps.setString(5, preferenciaPrecio);
+            ps.setString(5, preferencia);
 
             ps.executeUpdate();
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error guardando conversación",
                     e
@@ -54,20 +55,20 @@ public class ConversacionDAO {
         }
     }
 
-    public Conversacion obtener(String usuarioId) {
+    public Conversacion obtener(String usuario) {
 
         String sql = """
-            SELECT *
-            FROM conversaciones
-            WHERE usuario_id = ?
-            """;
+                SELECT *
+                FROM conversaciones
+                WHERE usuario = ?
+                """;
 
         try (
                 Connection con = Conexion.getConexion();
                 PreparedStatement ps = con.prepareStatement(sql)
         ) {
 
-            ps.setString(1, usuarioId);
+            ps.setString(1, usuario);
 
             try (ResultSet rs = ps.executeQuery()) {
 
@@ -76,7 +77,7 @@ public class ConversacionDAO {
                     Conversacion c = new Conversacion();
 
                     c.setUsuarioId(
-                            rs.getString("usuario_id")
+                            rs.getString("usuario")
                     );
 
                     c.setUltimoProductoId(
@@ -100,6 +101,7 @@ public class ConversacionDAO {
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Error obteniendo conversación",
                     e

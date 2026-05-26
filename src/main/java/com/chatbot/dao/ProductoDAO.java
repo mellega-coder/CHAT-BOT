@@ -412,8 +412,9 @@ public class ProductoDAO {
     }
 
     public Producto buscarAlternativa(
-            String categoria,
-            String preferencia
+        String categoria,
+        String preferencia,
+        int productoActualId
     ) {
 
         List<Producto> productos =
@@ -423,11 +424,21 @@ public class ProductoDAO {
 
         for (Producto p : productos) {
 
+            /*
+            EVITA REPETIR EL MISMO PRODUCTO
+            */
+            if (p.getId() == productoActualId) {
+                continue;
+            }
+
             if (
                     p.getCategoria() != null &&
                     p.getCategoria().equalsIgnoreCase(categoria)
             ) {
 
+                /*
+                PRODUCTOS BARATOS
+                */
                 if (
                         preferencia.equals("BARATO") &&
                         p.getPrecio().doubleValue() <= 300
@@ -436,6 +447,9 @@ public class ProductoDAO {
                     return p;
                 }
 
+                /*
+                PRODUCTOS PREMIUM
+                */
                 if (
                         preferencia.equals("PREMIUM") &&
                         p.getPrecio().doubleValue() >= 500
@@ -444,6 +458,9 @@ public class ProductoDAO {
                     return p;
                 }
 
+                /*
+                PRODUCTO NORMAL
+                */
                 if (mejor == null) {
                     mejor = p;
                 }
