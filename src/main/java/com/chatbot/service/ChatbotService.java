@@ -35,6 +35,19 @@ public class ChatbotService {
         return saludos[random.nextInt(saludos.length)];
     }
 
+private String generarCierre() {
+
+        String[] cierres = {
+                "¿Te gustaría más información? 😊",
+                "Puedo ayudarte con más detalles si deseas 🔥",
+                "También puedo recomendarte productos similares 😄",
+                "Si deseas, puedo mostrarte otras opciones disponibles 👌",
+                "Tenemos más modelos disponibles 🚀"
+        };
+
+        return cierres[random.nextInt(cierres.length)];
+        }
+
     public String procesarMensaje(String mensaje) {
 
         if (mensaje == null || mensaje.isBlank()) {
@@ -85,107 +98,132 @@ public class ChatbotService {
 
                 case "PRECIO":
 
-                    respuesta = """
-                    %s
+                        respuesta = """
+                        %s
+                        
+                        El producto:
+                        🖥️ %s
+                        
+                        tiene un precio actual de:
+                        💰 S/ %.2f
+                        
+                        📦 Stock disponible: %d unidades
+                        
+                        %s
+                        """.formatted(
+                                saludoAleatorio(),
+                                producto.getNombre(),
+                                producto.getPrecio(),
+                                producto.getStock(),
+                                generarCierre()
+                        );
 
-                    El producto 🛒 %s
-
-                    tiene un precio de 💰 S/ %.2f
-
-                    📦 Actualmente tenemos %d unidades disponibles.
-                    """.formatted(
-                            saludoAleatorio(),
-                            producto.getNombre(),
-                            producto.getPrecio(),
-                            producto.getStock()
-                    );
-
-                    break;
+                        break;
 
                 case "STOCK":
 
-                    respuesta = """
-                    %s
+                        respuesta = """
+                        %s
+                        
+                        Sí 😊 tenemos disponible:
+                        
+                        🛒 %s
+                        
+                        📦 Stock actual: %d unidades
+                        
+                        💰 Precio: S/ %.2f
+                        
+                        %s
+                        """.formatted(
+                                saludoAleatorio(),
+                                producto.getNombre(),
+                                producto.getStock(),
+                                producto.getPrecio(),
+                                generarCierre()
+                        );
 
-                    Sí 😊 tenemos disponible:
-
-                    🛒 %s
-
-                    📦 Stock actual: %d unidades.
-                    """.formatted(
-                            saludoAleatorio(),
-                            producto.getNombre(),
-                            producto.getStock()
-                    );
-
-                    break;
+                        break;
 
                 case "COMPRA":
 
-                    respuesta = """
-                    %s
+                        respuesta = """
+                        %s
+                        
+                        Excelente elección 🔥
+                        
+                        🛒 Producto:
+                        %s
+                        
+                        💰 Precio: S/ %.2f
+                        
+                        📦 Disponibles: %d unidades
+                        
+                        📄 %s
+                        
+                        %s
+                        """.formatted(
+                                saludoAleatorio(),
+                                producto.getNombre(),
+                                producto.getPrecio(),
+                                producto.getStock(),
+                                producto.getDescripcion(),
+                                generarCierre()
+                        );
 
-                    Puedes comprar ahora mismo:
-
-                    🛒 %s
-
-                    💰 Precio: S/ %.2f
-                    📦 Stock disponible: %d unidades
-
-                    ¿Te gustaría más información? 😄
-                    """.formatted(
-                            saludoAleatorio(),
-                            producto.getNombre(),
-                            producto.getPrecio(),
-                            producto.getStock()
-                    );
-
-                    break;
+                        break;
 
                 case "ENVIO":
 
-                    respuesta = """
-                    %s
+                        respuesta = """
+                        %s
+                        
+                        🚚 Sí realizamos envíos.
+                        
+                        Producto:
+                        🛒 %s
+                        
+                        💰 Precio: S/ %.2f
+                        
+                        📦 Stock disponible: %d
+                        
+                        Podemos coordinar entrega inmediata 😄
+                        """.formatted(
+                                saludoAleatorio(),
+                                producto.getNombre(),
+                                producto.getPrecio(),
+                                producto.getStock()
+                        );
 
-                    Sí 🚚 realizamos envíos para:
-
-                    🛒 %s
-
-                    💰 Precio: S/ %.2f
-
-                    ¿Deseas coordinar entrega o más información? 😄
-                    """.formatted(
-                            saludoAleatorio(),
-                            producto.getNombre(),
-                            producto.getPrecio()
-                    );
-
-                    break;
+                        break;
 
                 default:
 
-                    respuesta = """
-                    %s
+                        respuesta = """
+                        %s
+                        
+                        Tenemos disponible este producto 👇
+                        
+                        🛒 %s
+                        
+                        💰 Precio: S/ %.2f
+                        
+                        📦 Stock: %d unidades
+                        
+                        📄 Descripción:
+                        %s
+                        
+                        %s
+                        """.formatted(
+                                saludoAleatorio(),
+                                producto.getNombre(),
+                                producto.getPrecio(),
+                                producto.getStock(),
+                                producto.getDescripcion(),
+                                generarCierre()
+                        );
 
-                    Tenemos disponible:
-
-                    🛒 %s
-
-                    💰 Precio: S/ %.2f
-                    📦 Stock: %d unidades
-
-                    📄 Descripción:
-                    %s
-                    """.formatted(
-                            saludoAleatorio(),
-                            producto.getNombre(),
-                            producto.getPrecio(),
-                            producto.getStock(),
-                            producto.getDescripcion()
-                    );
-
-                    break;
-            }
+                        break;
+                }
 
             /*
              GUARDA CONTEXTO DE CONVERSACIÓN
