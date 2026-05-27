@@ -426,6 +426,19 @@ private String aplicarPersonalidad(String mensaje) {
             }
         }
 
+        if (!hayRelacionConProductos(texto)) {
+
+        return aplicarPersonalidad(
+                """
+                😅 Actualmente no contamos con ese producto exacto.
+
+                Pero sí tenemos otras opciones disponibles en la tienda 🎮
+
+                ¿Te gustaría ver recomendaciones reales de nuestro catálogo? 👌
+                """
+        );
+        }
+
         /*
          IA OPENAI
         */
@@ -567,6 +580,39 @@ private String aplicarPersonalidad(String mensaje) {
                 texto.contains("otro producto") ||
                 texto.contains("recomiendame otro") ||
                 texto.contains("recomiéndame otro");
+        }
+
+        private boolean hayRelacionConProductos(String texto) {
+
+        texto = texto.toLowerCase();
+
+        List<Producto> productos =
+                productoDAO.listarActivos();
+
+        for (Producto p : productos) {
+
+                String contenido =
+                        (
+                        p.getNombre() + " " +
+                        p.getCategoria() + " " +
+                        p.getMarca() + " " +
+                        p.getTags()
+                        ).toLowerCase();
+
+                String[] palabras = texto.split("\\s+");
+
+                for (String palabra : palabras) {
+
+                if (
+                        palabra.length() > 3 &&
+                        contenido.contains(palabra)
+                ) {
+                        return true;
+                }
+                }
+        }
+
+        return false;
         }
 
         private boolean buscaProductoInexistente(

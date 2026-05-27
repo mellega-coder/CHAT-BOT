@@ -21,7 +21,8 @@ public class ProductoDAO {
                 rs.getBoolean("estado"),
                 rs.getString("categoria"),
                 rs.getString("marca"),
-                rs.getString("tags")
+                rs.getString("tags"),
+                rs.getString("imagen")
         );
     }
 
@@ -130,9 +131,10 @@ public class ProductoDAO {
                 estado,
                 categoria,
                 marca,
-                tags
+                tags,
+                imagen
                 )
-                VALUES(?,?,?,?,?,?,?,?)
+                VALUES(?,?,?,?,?,?,?,?,?)
                 """;
 
         try (
@@ -161,6 +163,8 @@ public class ProductoDAO {
 
             ps.setString(8, p.getTags());
 
+            ps.setString(9, p.getImagen());
+
             ps.executeUpdate();
 
         } catch (SQLException e) {
@@ -179,7 +183,8 @@ public class ProductoDAO {
                 estado=?,
                 categoria=?,
                 marca=?,
-                tags=?
+                tags=?,
+                imagen=?
                 WHERE id=?
                 """;
 
@@ -209,7 +214,9 @@ public class ProductoDAO {
 
             ps.setString(8, p.getTags());
 
-            ps.setInt(9, p.getId());
+            ps.setString(9, p.getImagen());
+
+            ps.setInt(10, p.getId());
 
             ps.executeUpdate();
 

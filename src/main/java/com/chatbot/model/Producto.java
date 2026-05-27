@@ -15,6 +15,7 @@ public class Producto {
     private String categoria;
     private String marca;
     private String tags;
+    private String imagen;
 
     public Producto() {
     }
@@ -28,7 +29,8 @@ public class Producto {
             boolean activo,
             String categoria,
             String marca,
-            String tags
+            String tags,
+            String imagen
     ) {
         this.id = id;
         this.nombre = nombre;
@@ -39,6 +41,7 @@ public class Producto {
         this.categoria = categoria;
         this.marca = marca;
         this.tags = tags;
+        this.imagen = imagen;
     }
 
     public int getId() {
@@ -111,5 +114,13 @@ public class Producto {
 
     public void setTags(String tags) {
         this.tags = tags;
+    }
+
+    public String getImagen() {
+    return imagen;
+    }
+
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 }

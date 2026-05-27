@@ -83,17 +83,43 @@
     <table>
         <tr>
             <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Marca</th>
             <th>Precio</th>
             <th>Stock</th>
             <th>Descripción</th>
-            <% if (esAdmin) { %><th>Acciones</th><% } %>
+            <th>Tags IA</th>
+            <% if (esAdmin) { %>
+                <th>Acciones</th>
+            <% } %>
         </tr>
         <% for (Producto p : productos) { %>
         <tr>
             <td><%= p.getNombre() %></td>
+            <td>
+                <%= p.getCategoria() != null
+                    ? p.getCategoria()
+                    : "-" %>
+            </td>
+            <td>
+                <%= p.getMarca() != null
+                    ? p.getMarca()
+                    : "-" %>
+            </td>
             <td>S/ <%= df.format(p.getPrecio()) %></td>
             <td><%= p.getStock() %></td>
             <td><%= p.getDescripcion() %></td>
+            <td>
+                <%= p.getTags() != null
+                    ? p.getTags()
+                    : "-" %>
+            </td>
+            <td>
+                <img
+                    src="<%= p.getImagen() %>"
+                    width="100"
+                    style="border-radius:10px;">
+            </td>
             <% if (esAdmin) { %>
             <td>
                 <form action="admin/productos" method="post" style="display:inline;">
@@ -143,6 +169,36 @@
             <input type="number" step="0.01" name="precio" placeholder="Precio" required>
             <input type="number" name="stock" placeholder="Stock" required>
             <input type="text" name="descripcion" placeholder="Descripción">
+            <select name="categoria" required>
+                <option value="">Selecciona categoría</option>
+                <option value="Procesador">Procesador</option>
+                <option value="Monitor">Monitor</option>
+                <option value="Placa Madre">Placa Madre</option>
+                <option value="Case Gamer">Case Gamer</option>
+                <option value="Tarjeta de Video">Tarjeta de Video</option>
+                <option value="Teclado">Teclado</option>
+                <option value="Disco Sólido">Disco Sólido</option>
+                <option value="Memoria Ram">Memoria Ram</option>
+                <option value="USB">USB</option>
+                <option value="Fuente de Poder">Fuente de Poder</option>
+                <option value="Redes">Redes</option>
+                <option value="Estabilizador">Estabilizador</option>
+                <option value="Silla Gamer">Silla Gamer</option>
+                <option value="Impresora">Impresora</option>
+                <option value="Mouse">USB</option>
+                <option value="Cooler">Cooler</option>
+                <option value="Audifonos">Audifonos</option>
+                <option value="Parlantes">Parlantes</option>
+                <option value="Rack">Rack</option>
+            </select>
+            <input type="text" name="marca" placeholder="Marca">
+            <textarea 
+                name="tags"
+                placeholder="Ejemplo: gamer,rgb,streaming,oficina,económico">
+            </textarea>
+            <input type="text"
+            name="imagen"
+            placeholder="URL de imagen">
             <button type="submit">Guardar producto</button>
         </form>
     </div>
