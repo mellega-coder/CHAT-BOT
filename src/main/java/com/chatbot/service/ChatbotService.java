@@ -428,15 +428,19 @@ private String aplicarPersonalidad(String mensaje) {
 
         if (!hayRelacionConProductos(texto)) {
 
-        return aplicarPersonalidad(
-                """
-                😅 Actualmente no contamos con ese producto exacto.
-
-                Pero sí tenemos otras opciones disponibles en la tienda 🎮
-
-                ¿Te gustaría ver recomendaciones reales de nuestro catálogo? 👌
-                """
+        mensajeDAO.guardar(
+                mensaje,
+                "Producto no encontrado en inventario"
         );
+
+        return """
+        😅 Actualmente no contamos con ese producto exacto.
+
+        🔍 Nuestro chatbot solo puede recomendar
+        productos reales disponibles en la tienda.
+
+        ¿Te gustaría ver otras opciones gamer disponibles? 🎮
+        """;
         }
 
         /*
@@ -589,6 +593,8 @@ private String aplicarPersonalidad(String mensaje) {
         List<Producto> productos =
                 productoDAO.listarActivos();
 
+        int coincidencias = 0;
+
         for (Producto p : productos) {
 
                 String contenido =
@@ -603,16 +609,22 @@ private String aplicarPersonalidad(String mensaje) {
 
                 for (String palabra : palabras) {
 
+                palabra = palabra.trim();
+
                 if (
                         palabra.length() > 3 &&
                         contenido.contains(palabra)
                 ) {
-                        return true;
+
+                        coincidencias++;
                 }
                 }
         }
 
-        return false;
+        /*
+        EXIGE MÁS COINCIDENCIAS
+        */
+        return coincidencias >= 2;
         }
 
         private boolean buscaProductoInexistente(
