@@ -40,7 +40,8 @@ public class ProductoDAO {
                 estado,
                 categoria,
                 marca,
-                tags
+                tags,
+                imagen
                 FROM productos
                 WHERE estado = 1
                 ORDER BY id DESC
@@ -94,7 +95,8 @@ public class ProductoDAO {
                 estado,
                 categoria,
                 marca,
-                tags
+                tags,
+                imagen
                 FROM productos
                 WHERE id = ?
                 """;
