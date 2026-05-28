@@ -82,6 +82,7 @@
     <h2>Productos disponibles</h2>
     <table>
         <tr>
+            <th>Imagen</th>
             <th>Nombre</th>
             <th>Categoría</th>
             <th>Marca</th>
@@ -95,6 +96,17 @@
         </tr>
         <% for (Producto p : productos) { %>
         <tr>
+            <td>
+                <img
+                    src="<%= p.getImagen() %>"
+                    width="80"
+                    height="80"
+                    style="
+                        border-radius:10px;
+                        object-fit:cover;
+                    "
+                >
+            </td>
             <td><%= p.getNombre() %></td>
             <td>
                 <%= p.getCategoria() != null
