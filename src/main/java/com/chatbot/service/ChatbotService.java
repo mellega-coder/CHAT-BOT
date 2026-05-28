@@ -49,6 +49,212 @@ private String generarCierre() {
         return cierres[random.nextInt(cierres.length)];
 }
 
+private String generarComentarioProducto(
+        Producto producto
+) {
+
+    if (
+            producto == null ||
+            producto.getCategoria() == null
+    ) {
+
+        return "🔥 Producto recomendado para ti.";
+    }
+
+    String categoria =
+            producto.getCategoria()
+                    .toLowerCase();
+
+    /*
+    MONITOR
+    */
+    if (categoria.contains("monitor")) {
+
+        return "🖥️ Excelente opción para gaming, streaming y trabajo multitarea.";
+    }
+
+    /*
+    PROCESADOR
+    */
+    if (categoria.contains("procesador")) {
+
+        return "⚡ Gran rendimiento para gaming y aplicaciones exigentes.";
+    }
+
+    /*
+    TARJETA VIDEO
+    */
+    if (
+            categoria.contains("tarjeta") ||
+            categoria.contains("video")
+    ) {
+
+        return "🎮 Ideal para juegos en alta calidad y máximo rendimiento gráfico.";
+    }
+
+    /*
+    PLACA MADRE
+    */
+    if (
+            categoria.contains("placa")
+    ) {
+
+        return "🛠️ Base sólida y estable para tu PC gamer.";
+    }
+
+    /*
+    CASE
+    */
+    if (
+            categoria.contains("case")
+    ) {
+
+        return "🔥 Diseño gamer con excelente flujo de aire y estética premium.";
+    }
+
+    /*
+    TECLADO
+    */
+    if (
+            categoria.contains("teclado")
+    ) {
+
+        return "⌨️ Perfecto para largas sesiones gaming y máxima comodidad.";
+    }
+
+    /*
+    MOUSE
+    */
+    if (
+            categoria.contains("mouse")
+    ) {
+
+        return "🖱️ Precisión ideal para juegos competitivos.";
+    }
+
+    /*
+    RAM
+    */
+    if (
+            categoria.contains("ram")
+    ) {
+
+        return "🚀 Mejora notablemente la velocidad y fluidez del sistema.";
+    }
+
+    /*
+    SSD
+    */
+    if (
+            categoria.contains("disco")
+    ) {
+
+        return "💾 Excelente velocidad de carga para juegos y programas.";
+    }
+
+    /*
+    FUENTE
+    */
+    if (
+            categoria.contains("fuente")
+    ) {
+
+        return "⚡ Energía estable y segura para todos tus componentes.";
+    }
+
+    /*
+    COOLER
+    */
+    if (
+            categoria.contains("cooler")
+    ) {
+
+        return "❄️ Mantiene temperaturas óptimas incluso en gaming intenso.";
+    }
+
+    /*
+    AUDIFONOS
+    */
+    if (
+            categoria.contains("audifono")
+    ) {
+
+        return "🎧 Sonido envolvente ideal para juegos FPS y multimedia.";
+    }
+
+    /*
+    PARLANTES
+    */
+    if (
+            categoria.contains("parlante")
+    ) {
+
+        return "🔊 Excelente calidad de sonido para música y gaming.";
+    }
+
+    /*
+    SILLA GAMER
+    */
+    if (
+            categoria.contains("silla")
+    ) {
+
+        return "🪑 Máxima comodidad para largas sesiones frente al PC.";
+    }
+
+    /*
+    REDES
+    */
+    if (
+            categoria.contains("red")
+    ) {
+
+        return "🌐 Conexión estable y rápida para gaming online.";
+    }
+
+    /*
+    USB
+    */
+    if (
+            categoria.contains("usb")
+    ) {
+
+        return "🔌 Accesorio práctico y útil para múltiples dispositivos.";
+    }
+
+    /*
+    IMPRESORA
+    */
+    if (
+            categoria.contains("impresora")
+    ) {
+
+        return "🖨️ Excelente opción para oficina y uso profesional.";
+    }
+
+    /*
+    ESTABILIZADOR
+    */
+    if (
+            categoria.contains("estabilizador")
+    ) {
+
+        return "🔋 Protección ideal para cuidar tus equipos electrónicos.";
+    }
+
+    /*
+    RACK
+    */
+    if (
+            categoria.contains("rack")
+    ) {
+
+        return "🗄️ Organización y seguridad para tus equipos.";
+    }
+
+    return "🔥 Producto muy recomendado por nuestros clientes.";
+}
+
 private String aplicarPersonalidad(String mensaje) {
 
     boolean mensajeNegativo =
@@ -213,7 +419,6 @@ private String aplicarPersonalidad(String mensaje) {
 
         String respuesta = """
         😅 Actualmente no contamos con ese producto exacto.
-
         Pero sí tenemos otras opciones gamer disponibles 🎮
 
         ¿Te gustaría que te recomiende algo similar? 👌
@@ -235,18 +440,19 @@ private String aplicarPersonalidad(String mensaje) {
 
                         respuesta = """
                         %s
-                        
-                        El producto:
-                        🖥️ %s
-                        
-                        tiene un precio actual de:
-                        💰 S/ %.2f
-                        
+
+                        %s
+
+                        🛒 %s
+
+                        💰 Precio: S/ %.2f
+
                         📦 Stock disponible: %d unidades
-                        
+
                         %s
                         """.formatted(
                                 saludoAleatorio(),
+                                generarComentarioProducto(producto),
                                 producto.getNombre(),
                                 producto.getPrecio(),
                                 producto.getStock(),
@@ -265,8 +471,6 @@ private String aplicarPersonalidad(String mensaje) {
                         🛒 %s
                         
                         📦 Stock actual: %d unidades
-                        
-                        💰 Precio: S/ %.2f
                         
                         %s
                         """.formatted(
