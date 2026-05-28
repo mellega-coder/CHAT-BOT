@@ -249,6 +249,10 @@ public class ProductoDAO {
 
         String texto = normalizar(mensaje);
 
+        if (contieneCategoriaInexistente(texto)) {
+            return null;
+        }
+
         Producto mejorProducto = null;
 
         int mejorScore = -1;
@@ -366,6 +370,10 @@ public class ProductoDAO {
             }
         }
 
+        if (mejorScore < 60) {
+            return null;
+        }
+
         return mejorProducto;
     }
 
@@ -383,6 +391,31 @@ public class ProductoDAO {
         n = n.replaceAll("\\p{M}", "");
 
         return n.toLowerCase().trim();
+    }
+
+    private boolean contieneCategoriaInexistente(String texto) {
+
+        String[] categoriasNoExistentes = {
+                "play",
+                "playstation",
+                "ps5",
+                "ps4",
+                "xbox",
+                "nintendo",
+                "switch",
+                "laptop",
+                "iphone",
+                "tablet"
+        };
+
+        for (String palabra : categoriasNoExistentes) {
+
+            if (texto.contains(palabra)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private int distanciaLevenshtein(String a, String b) {
