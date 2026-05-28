@@ -295,39 +295,64 @@ public class ProductoDAO {
             for (String palabra : palabrasUsuario) {
 
                 /*
-                SI LA PALABRA ESTÁ EN EL NOMBRE
-                DA MUCHOS MÁS PUNTOS
+                IGNORAR PALABRAS MUY CORTAS
+                */
+                if (palabra.length() <= 2) {
+                    continue;
+                }
+
+                /*
+                NOMBRE EXACTO
                 */
                 if (nombre.contains(palabra)) {
                     score += 100;
                 }
 
                 /*
-                TAGS
+                CATEGORIA
                 */
-                else if (tags.contains(palabra)) {
-                    score += 40;
+                else if (categoria.contains(palabra)) {
+                    score += 80;
                 }
 
                 /*
-                CATEGORÍA
+                TAGS
                 */
-                else if (categoria.contains(palabra)) {
-                    score += 30;
+                else if (tags.contains(palabra)) {
+                    score += 50;
                 }
 
                 /*
                 MARCA
                 */
                 else if (marca.contains(palabra)) {
-                    score += 20;
+                    score += 30;
                 }
 
                 /*
-                CONTENIDO GENERAL
+                BUSQUEDA FLEXIBLE
                 */
-                else if (contenido.contains(palabra)) {
-                    score += 10;
+                else {
+
+                    String[] palabrasProducto =
+                            contenido.split("\\s+");
+
+                    for (String palabraProducto : palabrasProducto) {
+
+                        int distancia =
+                                distanciaLevenshtein(
+                                        palabra,
+                                        palabraProducto
+                                );
+
+                        /*
+                        PERMITE ERRORES PEQUEÑOS
+                        */
+                        if (distancia <= 2) {
+
+                            score += 25;
+                        }
+                    }
                 }
             }
 
@@ -371,6 +396,13 @@ public class ProductoDAO {
         }
 
         if (mejorScore < 60) {
+            return null;
+        }
+
+        /*
+        MINIMO DE COINCIDENCIA
+        */
+        if (mejorScore < 40) {
             return null;
         }
 
