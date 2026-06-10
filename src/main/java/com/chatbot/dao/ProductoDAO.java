@@ -26,6 +26,56 @@ public class ProductoDAO {
         );
     }
 
+    public Producto buscarCoincidenciaConPresupuesto(
+            String mensaje,
+            double presupuesto
+    ) {
+
+        Producto mejor = null;
+
+        int mejorScore = -1;
+
+        String texto =
+                normalizar(mensaje);
+
+        for (Producto p : listarActivos()) {
+
+            if (
+                    p.getPrecio().doubleValue()
+                    > presupuesto
+            ) {
+                continue;
+            }
+
+            int score = 0;
+
+            String contenido =
+                    (
+                            p.getNombre() + " " +
+                            p.getCategoria() + " " +
+                            p.getMarca() + " " +
+                            p.getTags()
+                    ).toLowerCase();
+
+            for (String palabra : texto.split("\\s+")) {
+
+                if (
+                        contenido.contains(palabra)
+                ) {
+                    score += 10;
+                }
+            }
+
+            if (score > mejorScore) {
+
+                mejorScore = score;
+                mejor = p;
+            }
+        }
+
+        return mejor;
+    }
+
     public List<Producto> listarActivos() {
 
         List<Producto> lista = new ArrayList<>();
@@ -483,6 +533,29 @@ public class ProductoDAO {
         }
 
         return dp[a.length()][b.length()];
+    }
+
+    public List<Producto> buscarPorPresupuesto(
+            String categoria,
+            double maximo
+    ) {
+
+        List<Producto> resultado =
+                new ArrayList<>();
+
+        for (Producto p : listarActivos()) {
+
+            if (
+                    p.getCategoria() != null &&
+                    p.getCategoria().equalsIgnoreCase(categoria) &&
+                    p.getPrecio().doubleValue() <= maximo
+            ) {
+
+                resultado.add(p);
+            }
+        }
+
+        return resultado;
     }
 
     public Producto buscarAlternativa(

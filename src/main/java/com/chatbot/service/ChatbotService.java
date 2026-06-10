@@ -8,6 +8,8 @@ import com.chatbot.model.Conversacion;
 import com.chatbot.model.Producto;
 import com.chatbot.model.Respuesta;
 import com.chatbot.model.PersonalidadChatbot;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import java.util.List;
 import java.util.Random;
@@ -21,6 +23,24 @@ public class ChatbotService {
     private final OpenAIService openAIService = new OpenAIService();
     private final Random random = new Random();
     private final PersonalidadChatbot personalidad = PersonalidadChatbot.GAMER;
+
+        private Double extraerPresupuesto(String texto) {
+
+        Pattern pattern =
+                Pattern.compile("(\\d{2,6})");
+
+        Matcher matcher =
+                pattern.matcher(texto);
+
+        if (matcher.find()) {
+
+                return Double.parseDouble(
+                        matcher.group(1)
+                );
+        }
+
+        return null;
+        }
 
     private String saludoAleatorio() {
 
@@ -351,7 +371,23 @@ private String aplicarPersonalidad(String mensaje) {
         return respuestaIA;
         }
 
-        Producto producto = productoDAO.buscarCoincidencia(texto);
+        Double presupuesto = extraerPresupuesto(texto);
+
+        Producto producto;
+
+        if (presupuesto != null) {
+
+        producto =
+                productoDAO.buscarCoincidenciaConPresupuesto(
+                        texto,
+                        presupuesto
+                );
+
+        } else {
+
+        producto =
+                productoDAO.buscarCoincidencia(texto);
+        }
 
         /*
          SI NO ENCUENTRA PRODUCTO,
@@ -652,17 +688,31 @@ private String aplicarPersonalidad(String mensaje) {
         */
         String respuestaIA = openAIService.preguntar(
                 """
-                Cliente escribió:
-                "%s"
+                Eres un vendedor.
 
-                Productos disponibles:
+                SOLO puedes responder usando
+                los productos listados.
+
+                SI NO EXISTE EL PRODUCTO:
+
+                responde:
+
+                "Actualmente no contamos con ese producto."
+
+                NO inventes productos.
+                NO inventes marcas.
+                NO inventes precios.
+
+                Productos:
+
                 %s
 
-                Responde como un vendedor amable, natural y profesional.
-                Recomienda productos adecuados según lo que busca el cliente.
+                Cliente:
+
+                %s
                 """.formatted(
-                        mensaje,
-                        obtenerProductosTexto()
+                        obtenerProductosTexto(),
+                        mensaje
                 )
         );
 
@@ -836,38 +886,34 @@ private String aplicarPersonalidad(String mensaje) {
                 Producto producto
         ) {
 
-        texto = texto.toLowerCase();
+        if (producto == null) {
+                return true;
+        }
 
-        String[] productosBuscados = {
-                "laptop",
-                "monitor",
-                "teclado",
-                "mouse",
-                "silla",
-                "pc",
-                "procesador",
-                "audifonos",
-                "microfono",
-                "camara"
-        };
+        String contenido =
+                (
+                        producto.getNombre() + " " +
+                        producto.getCategoria() + " " +
+                        producto.getTags()
+                ).toLowerCase();
 
-        for (String p : productosBuscados) {
+        String[] palabras = texto.split("\\s+");
 
-                if (texto.contains(p)) {
+        int coincidencias = 0;
+
+        for (String palabra : palabras) {
+
+                palabra = palabra.trim();
 
                 if (
-                        producto == null ||
-                        !producto.getNombre()
-                                .toLowerCase()
-                                .contains(p)
+                        palabra.length() > 3 &&
+                        contenido.contains(palabra)
                 ) {
-
-                        return true;
-                }
+                coincidencias++;
                 }
         }
 
-        return false;
+        return coincidencias == 0;
         }
 
         private boolean mensajeBuscaProducto(String texto) {
@@ -882,8 +928,23 @@ private String aplicarPersonalidad(String mensaje) {
                 texto.contains("silla") ||
                 texto.contains("gamer") ||
                 texto.contains("auricular") ||
+                texto.contains("audifono") ||
+                texto.contains("audífono") ||
                 texto.contains("microfono") ||
-                texto.contains("micrófono");
+                texto.contains("micrófono") ||
+                texto.contains("procesador") ||
+                texto.contains("ram") ||
+                texto.contains("ssd") ||
+                texto.contains("disco") ||
+                texto.contains("placa") ||
+                texto.contains("video") ||
+                texto.contains("gpu") ||
+                texto.contains("fuente") ||
+                texto.contains("cooler") ||
+                texto.contains("parlante") ||
+                texto.contains("impresora") ||
+                texto.contains("usb") ||
+                texto.contains("rack");
         }
 
 }
