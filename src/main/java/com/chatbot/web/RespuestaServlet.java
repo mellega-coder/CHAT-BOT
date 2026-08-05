@@ -14,6 +14,9 @@ public class RespuestaServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
         String accion = request.getParameter("accion");
         String id = request.getParameter("id");
         String palabrasClave = request.getParameter("palabras_clave");
