@@ -1000,7 +1000,15 @@ private String aplicarPersonalidad(String mensaje) {
         EL MENSAJE PREGUNTA LAS DOS COSAS A LA VEZ.
         */
         Respuesta faqDetectada = buscarRespuestaPredefinida(texto);
+        if (faqDetectada != null) {
 
+        mensajeDAO.guardar(
+                mensaje,
+                faqDetectada.getRespuesta()
+        );
+
+        return faqDetectada.getRespuesta();
+        }
         /*
         SI EL MENSAJE NO MENCIONA NINGUN PRODUCTO PERO SI
         COINCIDE CON UNA PREGUNTA FRECUENTE (ej. "hola",
@@ -1011,7 +1019,7 @@ private String aplicarPersonalidad(String mensaje) {
         !mensajeBuscaProducto(texto) YA HABIA HECHO return CON
         LA RESPUESTA DE LA IA ANTES DE ESE PUNTO DEL CODIGO.
         */
-        if (faqDetectada != null && !mensajeBuscaProducto(texto)) {
+        if (faqDetectada != null) {
 
         mensajeDAO.guardar(
                 mensaje,
